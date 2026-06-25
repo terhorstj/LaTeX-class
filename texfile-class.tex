@@ -1,3 +1,6 @@
+%!TEX TS-program = lualatex
+%!TEX encoding = UTF-8 Unicode
+
 \DocumentMetadata{
 lang = en-US,
 pdfversion = 2.0,
@@ -9,11 +12,12 @@ tagging-setup={math/setup=mathml-SE}
 \documentclass[10pt,lm,tagging]{jpt}
 % see file:///Users/John/iCloud/LaTeX/Class/README.md
 % tagging (must use LuaLaTeX)
-% cm, lm, mlm, tmx, npx, epx, minion, charter, nc, ebg, bvx, lib, bxoff, mtpsymb
+% use lualatex: cm, lm, tmx, npx, epx, charter, nc, ebg, bvx, lib, tgs, bxoff
+% requires pdflatex: mlm, ars, minion, mtpsymb
 % tables, captions
-% fullpage, wide, narrow, ars, blockpar
+% fullpage, wide, narrow, blockpar
 % onehalf, double, nolinespacing
-% misc, chem, secdots (e.g., 1. Introduction), \setcounter{secnumdepth}{0}
+% misc, chem, secdots 
 % lists, tightlists, looselists, footnotes, footnotesroman
 
 \title{Sample Document}
@@ -26,6 +30,16 @@ tagging-setup={math/setup=mathml-SE}
 
 \section{Introduction}
 
-...
+Here's to the crazy ones---the misfits, the rebels, the troublemakers, the round pegs in the square holes, the ones who see things differently. They're not fond of rules, and they have no respect for the status quo. You can quote them, disagree with them, glorify or vilify them, but the only thing you can't do is ignore them, because they change things. They push the human race forward, and while some may see them as the crazy ones, we see genius, because the people who are crazy enough to think that they can change the world are the ones who do.
+
+\begin{equation}
+\label{eq:u2dNint}
+\overline{u^2} = \int_0^\infty u^2 \frac{dN}{N} = 4\pi \left(\frac{m\beta}{2\pi}\right)^{\frac{3}{2}} \underbrace{\int_0^\infty e^{\displaystyle-mu^2\beta/2}u^4du}_{\displaystyle\frac{3}{8}\sqrt{\pi}\left(\frac{2}{m\beta}\right)^{\frac{5}{2}}}
+\end{equation}
+
+\begin{equation}
+\label{eq:schrodinger}
+-\frac{\hbar^2}{2m}\frac{\partial^2\Psi(x,t)}{\partial x^2} + V(x,t)\Psi(x,t) = i\hbar \frac{\partial\Psi(x,t)}{\partial t}
+\end{equation}
 
 \end{document}

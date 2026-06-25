@@ -29,7 +29,7 @@ By invoking the class file, you will automatically load the following packages a
 * ```\RequirePackage{comment}``` - extremely useful package that I always load
 * ```\RequirePackage[version=4]{mhchem}``` - chemistry package that also loads relevant math packages 
 * ```\frenchspacing``` - word and sentence spacing more in line with modern usage and styles
-* ```\def\dd{\end{document}}``` - handy shortcut for debugging 
+* ```\def\eof{\end{document}}``` - handy shortcut for debugging 
 * ```\def\eg{\textit{e.g.}}``` - stylistic e.g.,
 * ```\def\ie{\textit{i.e.}}``` - stylistic i.ei.,
 * ```\newenvironment{qnumerate}{\begin{enumerate}\renewcommand\labelenumi{\textbf {Q\theenumi.}}}{\end{enumerate}}``` - custom enumerate environment 
@@ -48,6 +48,7 @@ Other global options that I have added are as follow, with a brief description f
 * ```egb``` - use ```egbgaramond``` with math support from ```newtxmath```
 * ```bvx``` - use ```Baskervaldx``` with math support from ```newtxmath```
 * ```lib``` - use ```Libertine``` with math support from ```newtxmath```
+* ```tgs``` - use TeX Gyre Schola with OpenType math via ```unicode-math``` (requires LuaLaTeX or XeLaTeX)
 * ```bxoff``` - redefine ```bfseries``` to use non-extended bold (```b```, not ```bx```)
 * ```mtpsymb``` - use some preferred math symbols from ```mtpro2```
 * ```tables``` - better tables via ```booktabs```
@@ -70,7 +71,7 @@ Other global options that I have added are as follow, with a brief description f
 
 ## Details for Global Options: Fonts
 
-For each font selection (```cm```, ```lm```, ```mlm```, ```tmx```, ```npx```, ```minion```, ```charter```, ```nc```, ```egb```, ```bvx```, and ```lib```), other supporting packages are loaded for compatibility. **Only one font choice should be invoked. Invoking multiple font choices will result in option clashes.**
+For each font selection (```cm```, ```lm```, ```mlm```, ```tmx```, ```npx```, ```minion```, ```charter```, ```nc```, ```egb```, ```bvx```, ```lib```, and ```tgs```), other supporting packages are loaded for compatibility. **Only one font choice should be invoked. Invoking multiple font choices will result in option clashes.**
 
 ### If no font selection is made...
 
@@ -227,11 +228,10 @@ This option uses a New Century clone font with math support. Other supporting pa
 * ```\RequirePackage[T1]{fontenc}``` - modern T1 encoding
 * ```\RequirePackage{microtype}``` - improved typography
 * ```\RequirePackage{fouriernc}``` - New Century font with math support
-* ```\RequirePackage{setspace}\setstretch{1.05}``` - adjust linespacing
+* ```\RequirePackage{setspace}\setstretch{1.1}``` - adjust linespacing
 * ```\RequirePackage[artemisia]{textgreek}``` - load matching upright Greek in text mode
 * ```\RequirePackage[scr=txupr,cal=txupr,scrscaled=1.0,calscaled=1.0]{mathalpha}``` - load matching calligraphic and math script
 * ```\RequirePackage{biolinum}``` - Biolinum sans serif font
-* ```\RequirePackage{setspace}\setstretch{1.1}``` - adjust linespacing
 
 
 ### EBG
@@ -270,18 +270,35 @@ This option uses the Linux Libertine font with math support from ```newtxmath```
 
 * ```\RequirePackage[T1]{fontenc}``` - modern T1 encoding 
 * ```\RequirePackage{microtype}``` - improved typography
-* ```\RequirePackage{libertine}``` - Baskervaldx font
-* ```\RequirePackage[libertine]{newtxmath}``` - Baskervaldx math support 
+* ```\RequirePackage{libertine}``` - Libertine font
+* ```\RequirePackage[libertine]{newtxmath}``` - Libertine math support 
 * ```\RequirePackage[euler]{textgreek}``` - load matching upright Greek in text mode
 * ```\RequirePackage[scr=euler,cal=euler,scrscaled=1.0,calscaled=1.0]{mathalpha}``` - load matching calligraphic and math script 
 * ```\RequirePackage{biolinum}``` - Biolinum sans serif font
 * ```\RequirePackage{setspace}\setstretch{1.1}``` - adjust linespacing
 
+### TGS
+
+Example: ```\documentclass[10pt,tgs]{jpt}```
+
+This option uses the TeX Gyre Schola font (a Century Schoolbook clone) with full OpenType math support via ```unicode-math``` and the matching ```texgyreschola-math.otf``` math font. Because ```unicode-math``` takes over the entire math font system, no separate ```textgreek``` or ```mathalpha``` packages are needed; all math symbols, Greek letters, calligraphic and script alphabets are provided natively by the OpenType math font. **This option requires LuaLaTeX or XeLaTeX.**
+
+Note that ```unicode-math``` is incompatible with traditional 8-bit TeX math font packages (```newtxmath```, ```newpxmath```, ```eulerpx```, etc.), so ```tgs``` cannot be combined with other font options.
+
+* ```\RequirePackage{unicode-math}``` - OpenType math font support (loaded before ```mhchem```)
+* ```\RequirePackage{microtype}``` - improved typography
+* ```\setmainfont{TeX Gyre Schola}``` - TeX Gyre Schola text font (Century Schoolbook clone)
+* ```\setsansfont{TeX Gyre Heros}``` - TeX Gyre Heros sans-serif companion (Helvetica clone)
+* ```\setmonofont{TeX Gyre Cursor}``` - TeX Gyre Cursor monospace companion (Courier clone)
+* ```\setmathfont{texgyreschola-math.otf}``` - matching OpenType math font
+* ```\RequirePackage{setspace}\setstretch{1.1}``` - adjust linespacing
+
+
 ### BXOFF
 
-This option is simply redefines ```\bfseries``` to use a normal bold (```b```) typeface instead of the bold-extended (```bx```) typeface that is the default for CM/LM fonts. This option will have no effect if the font in use does not use bold-extended fonts.
+This option redefines ```\bfseries``` to use a normal bold (```b```) typeface instead of the bold-extended (```bx```) typeface that is the default for CM/LM fonts. **This option only has an effect when used alongside ```cm```, ```lm```, or ```mlm```**; it is silently ignored with any other font selection.
 
-* ```\def\bfseries{\fontseries{b}\selectfont}```
+* ```\AtBeginDocument{\def\bfseries{\fontseries{b}\selectfont}}```
 
 
 ### MTPSYMB
@@ -454,7 +471,7 @@ Example: ```\documentclass[10pt,cm,tightlists]{jpt}```
 
 Use this option to get rid of all spacing in default itemized/enumerated lists.
 
-* ```\RequirePackage[shortlabels]{enumitem}\setlist{noitemsep}\setlist{nolistsep}``` 
+* ```\RequirePackage[shortlabels]{enumitem}\setlist{noitemsep,nolistsep}``` 
 
 ### Looselists
 
@@ -468,7 +485,7 @@ Use this option to only enable ```enumitem``` with ```shortlabels```.
 
 Example: ```\documentclass[10pt,mlm,secdots]{jpt}```
 
-Uses ```titlesec``` to put periods after sub/section numbers, e.g., "1. Introduction" 
+Uses ```titlesec``` to put periods after sub/section numbers, e.g., "1. Introduction". **If ```ars``` is also active, ```secdots``` is silently ignored** since ```ars``` takes full control of section formatting.
 
 ### Tagging
 

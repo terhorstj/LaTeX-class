@@ -2,6 +2,7 @@
 %% v 1.2 added libertine support with other minor optimizations
 %% v 1.3 added newpx/eulerpx with other minor optimizations
 %% v 1.4 refined calligraphic in math script, moved emf definition to chemistry package, added Faraday's constant
+%% v 1.5 bug fixes from claude
 
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{jpt}
@@ -60,6 +61,7 @@
 \newif\if@ebg\DeclareOption{ebg}{\@ebgtrue}
 \newif\if@bvx\DeclareOption{bvx}{\@bvxtrue}
 \newif\if@lib\DeclareOption{lib}{\@libtrue}
+\newif\if@tgs\DeclareOption{tgs}{\@tgstrue}
 \newif\if@bxoff\DeclareOption{bxoff}{\@bxofftrue}
 
 % -- tables and captions
@@ -135,7 +137,7 @@
     \renewcommand\newblock{\par}}%
 }
 \ExecuteOptions{letterpaper,10pt,oneside,onecolumn,final}
-\ProcessOptions
+\ProcessOptions\relax
 \input{size1\@ptsize.clo}
 \setlength\lineskip{1\p@}
 \setlength\normallineskip{1\p@}
@@ -380,7 +382,7 @@
 \renewcommand\p@enumiii{\theenumi(\theenumii)}
 \renewcommand\p@enumiv{\p@enumiii\theenumiii}
 \newcommand\labelitemi  {\labelitemfont \textbullet}
-\newcommand\labelitemii {\labelitemfont \bfseries \textopenbullet}
+\newcommand\labelitemii {\labelitemfont \bfseries $\circ$}
 \newcommand\labelitemiii{\labelitemfont \textasteriskcentered}
 \newcommand\labelitemiv {\labelitemfont \textperiodcentered}
 \newcommand\labelitemfont{\normalfont}
@@ -411,7 +413,7 @@
         \end{center}%
         \quote % jpt was quotation, which uses first line indent
       \fi}
-      {\if@twocolumn\else\endquotation\fi}
+      {\if@twocolumn\else\endquote\fi}
 \fi
 \newenvironment{verse}
                {\let\\\@centercr
@@ -673,12 +675,13 @@
 
 % packages
 \RequirePackage{comment}
+\if@tgs\RequirePackage{unicode-math}\fi
 \RequirePackage[version=4]{mhchem}
 \frenchspacing
 \newenvironment{qnumerate}{\begin{enumerate}\renewcommand\labelenumi{\textbf{Q\theenumi.}}}{\end{enumerate}}
 \def\eg{\textit{e.g.}}
 \def\ie{\textit{i.e.}}
-\def\dd{\end{document}}
+\def\eof{\end{document}}
 \newcommand{\on}[1]{\,\operatorname{#1}}
 \newcommand{\ffbox}[1]{\fbox{\fbox{\parbox{.95\textwidth}{\centering #1}}}}
 
@@ -689,8 +692,11 @@
 % Redefine \bfseries to use non-extended bold (b, not bx)
 
 \if@bxoff
-  \def\bfseries{\fontseries{b}\selectfont}
-\else
+  \if@cm\AtBeginDocument{\def\bfseries{\fontseries{b}\selectfont}}\else
+  \if@lm\AtBeginDocument{\def\bfseries{\fontseries{b}\selectfont}}\else
+  \if@mlm\AtBeginDocument{\def\bfseries{\fontseries{b}\selectfont}}\else
+    \ClassWarning{jpt}{Option 'bxoff' only applies to cm, lm, or mlm fonts and will be ignored}
+  \fi\fi\fi
 \fi
 
 % lists
@@ -699,7 +705,7 @@
 	\RequirePackage[shortlabels]{enumitem}\setlist{noitemsep}
 \else
   \if@tightlists
-  	\RequirePackage[shortlabels]{enumitem}\setlist{noitemsep}\setlist{nolistsep}
+  	\RequirePackage[shortlabels]{enumitem}\setlist{noitemsep,nolistsep}
   \else
     \if@looselists
       \RequirePackage[shortlabels]{enumitem}
@@ -1024,8 +1030,31 @@
   \fi
   \RequirePackage[euler]{textgreek}
   \RequirePackage[scr=euler,cal=euler,scrscaled=1.0,calscaled=1.0]{mathalpha}
-  \RequirePackage{anyfontsize}  
+  \RequirePackage{anyfontsize}
   \else
+\fi
+
+\if@tgs
+  \RequirePackage{microtype}
+  \RequirePackage{setspace}
+  \setstretch{1.1}
+  \if@onehalf
+    \onehalfspacing
+  \else
+  \fi
+  \if@double
+    \doublespacing
+  \else
+  \fi
+  \if@nolinespacing
+    \setstretch{1.0}
+  \else
+  \fi
+  \setmainfont{TeX Gyre Schola}
+  \setsansfont{TeX Gyre Heros}
+  \setmonofont{TeX Gyre Cursor}
+  \setmathfont{texgyreschola-math.otf}
+\else
 \fi
 
 \if@mtpsymb
@@ -1070,19 +1099,12 @@
 \fi
 
 \if@fullpage
-  \RequirePackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}  
-\else
-\fi
-
-\if@wide
-  \RequirePackage[top=1in, bottom=1in, left=1.8in, right=1.8in]{geometry}  
-\else
-\fi
-
-\if@narrow
-  \RequirePackage[top=0.5in, bottom=0.5in, left=0.5in, right=0.5in, includefoot]{geometry}  
-\else
-\fi
+  \RequirePackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\else\if@wide
+  \RequirePackage[top=1in, bottom=1in, left=1.8in, right=1.8in]{geometry}
+\else\if@narrow
+  \RequirePackage[top=0.5in, bottom=0.5in, left=0.5in, right=0.5in, includefoot]{geometry}
+\fi\fi\fi
 
 \if@footnotes
   \newcommand\blfootnote[1]{%
@@ -1171,9 +1193,9 @@
   \RequirePackage{recycle}
   \RequirePackage{float}
   \RequirePackage[dvipsnames]{xcolor}
-  \usepackage{siunitx}
-    \newcommand{\bra}[1]{\langle{#1}}
-    \newcommand{\ket}[1]{{#1}\rangle}
+  \RequirePackage{siunitx}
+    \providecommand{\bra}[1]{\langle{#1}}
+    \providecommand{\ket}[1]{{#1}\rangle}
   %\RequirePackage{url}
   \RequirePackage[all]{nowidow}
   \RequirePackage{nicefrac}
@@ -1236,10 +1258,12 @@
 \fi
 
 \if@secdots
-  \RequirePackage{titlesec}
-  \titleformat{\section}{\bfseries}{\thetitle.}{1ex}{}
-  \titleformat{\subsection}{\bfseries}{\thetitle.}{1ex}{}
-  \titleformat{\subsubsection}{\bfseries}{\thesubsubsection.}{1ex}{}
+  \if@ars\else
+    \RequirePackage{titlesec}
+    \titleformat{\section}{\bfseries}{\thesection.}{1ex}{}
+    \titleformat{\subsection}{\bfseries}{\thesubsection.}{1ex}{}
+    \titleformat{\subsubsection}{\bfseries}{\thesubsubsection.}{1ex}{}
+  \fi
 \fi
 
 % ==========================================================================================
