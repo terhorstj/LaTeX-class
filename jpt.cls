@@ -3,39 +3,12 @@
 %% v 1.3 added newpx/eulerpx with other minor optimizations
 %% v 1.4 refined calligraphic in math script, moved emf definition to chemistry package, added Faraday's constant
 %% v 1.5 bug fixes from claude
+%% v 1.6 now a true subclass: \LoadClass{article} instead of a copy of article.cls
 
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{jpt}
-              [2025/12/16 v1.5
+              [2026/08/24 v1.6
  Modified LaTeX article class]
-\newcommand\@ptsize{}
-\newif\if@restonecol
-\newif\if@titlepage
-\@titlepagefalse
-\if@compatibility\else
-  \DeclareOption{a4paper}
-     {\setlength\paperheight {297mm}%
-      \setlength\paperwidth  {210mm}}
-  \DeclareOption{a5paper}
-     {\setlength\paperheight {210mm}%
-      \setlength\paperwidth  {148mm}}
-  \DeclareOption{b5paper}
-     {\setlength\paperheight {250mm}%
-      \setlength\paperwidth  {176mm}}
-  \DeclareOption{letterpaper}
-     {\setlength\paperheight {11in}%
-      \setlength\paperwidth  {8.5in}}
-  \DeclareOption{legalpaper}
-     {\setlength\paperheight {14in}%
-      \setlength\paperwidth  {8.5in}}
-  \DeclareOption{executivepaper}
-     {\setlength\paperheight {10.5in}%
-      \setlength\paperwidth  {7.25in}}
-  \DeclareOption{landscape}
-     {\setlength\@tempdima   {\paperheight}%
-      \setlength\paperheight {\paperwidth}%
-      \setlength\paperwidth  {\@tempdima}} 
-\fi
 
 % ==========================================================================================
 % ==========================================================================================
@@ -49,6 +22,7 @@
 
 % -- fonts --
 \newif\if@cm\DeclareOption{cm}{\@cmtrue} 
+\newif\if@cmgr\DeclareOption{cmgr}{\@cmgrtrue} 
 \newif\if@lm\DeclareOption{lm}{\@lmtrue} 
 \newif\if@mlm\DeclareOption{mlm}{\@mlmtrue} 
 \newif\if@tmx\DeclareOption{tmx}{\@tmxtrue} 
@@ -101,101 +75,35 @@
 % ==========================================================================================
 % ==========================================================================================
 
-\if@compatibility
-  \renewcommand\@ptsize{0}
-\else
-  \DeclareOption{10pt}{\renewcommand\@ptsize{0}}
-\fi
-\DeclareOption{11pt}{\renewcommand\@ptsize{1}}
-\DeclareOption{12pt}{\renewcommand\@ptsize{2}}
-\if@compatibility\else
-  \DeclareOption{oneside}{\@twosidefalse \@mparswitchfalse}
-\fi
-\DeclareOption{twoside}{\@twosidetrue  \@mparswitchtrue}
-\DeclareOption{draft}{\setlength\overfullrule{5pt}}
-\if@compatibility\else
-  \DeclareOption{final}{\setlength\overfullrule{0pt}}
-\fi
-\DeclareOption{titlepage}{\@titlepagetrue}
-\if@compatibility\else
-  \DeclareOption{notitlepage}{\@titlepagefalse}
-\fi
-\if@compatibility\else
-  \DeclareOption{onecolumn}{\@twocolumnfalse}
-\fi
-\DeclareOption{twocolumn}{\@twocolumntrue}
-\DeclareOption{leqno}{\input{leqno.clo}}
-\DeclareOption{fleqn}{\input{fleqn.clo}}
-\DeclareOption{openbib}{%
-  \AtEndOfPackage{%
-    \renewcommand\@openbib@code{%
-      \advance\leftmargin\bibindent
-      \itemindent -\bibindent
-      \listparindent \itemindent
-      \parsep \z@
-      }%
-    \renewcommand\newblock{\par}}%
-}
-\ExecuteOptions{letterpaper,10pt,oneside,onecolumn,final}
+
+% jpt claims its own options above; everything else -- 10pt/11pt/12pt, twoside,
+% titlepage, twocolumn, leqno, fleqn, openbib, paper sizes -- goes to article.
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
-\input{size1\@ptsize.clo}
-\setlength\lineskip{1\p@}
-\setlength\normallineskip{1\p@}
-\renewcommand\baselinestretch{}
-\setlength\parskip{0\p@ \@plus \p@}
-\@lowpenalty   51
-\@medpenalty  151
-\@highpenalty 301
-\setcounter{topnumber}{2}
-\renewcommand\topfraction{.7}
-\setcounter{bottomnumber}{1}
-\renewcommand\bottomfraction{.3}
-\setcounter{totalnumber}{3}
-\renewcommand\textfraction{.2}
-\renewcommand\floatpagefraction{.5}
-\setcounter{dbltopnumber}{2}
-\renewcommand\dbltopfraction{.7}
-\renewcommand\dblfloatpagefraction{.5}
-\if@twoside
-  \def\ps@headings{%
-      \let\@oddfoot\@empty\let\@evenfoot\@empty
-      \def\@evenhead{\thepage\hfil\slshape\leftmark}%
-      \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
-      \let\@mkboth\markboth
-    \def\sectionmark##1{%
-      \markboth {\MakeUppercase{%
-        \ifnum \c@secnumdepth >\z@
-          \thesection\quad
-        \fi
-        ##1}}{}}%
-    \def\subsectionmark##1{%
-      \markright {%
-        \ifnum \c@secnumdepth >\@ne
-          \thesubsection\quad
-        \fi
-        ##1}}}
-\else
-  \def\ps@headings{%
-    \let\@oddfoot\@empty
-    \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
-    \let\@mkboth\markboth
-    \def\sectionmark##1{%
-      \markright {\MakeUppercase{%
-        \ifnum \c@secnumdepth >\m@ne
-          \thesection\quad
-        \fi
-        ##1}}}}
-\fi
-\def\ps@myheadings{%
-    \let\@oddfoot\@empty\let\@evenfoot\@empty
-    \def\@evenhead{\thepage\hfil\slshape\leftmark}%
-    \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
-    \let\@mkboth\@gobbletwo
-    \let\sectionmark\@gobble
-    \let\subsectionmark\@gobble
-    }
+\LoadClass{article}
+
+% ==========================================================================================
+% ==========================================================================================
+% ==========================================================================================
+
+% jpt overrides of article.cls -- everything else article now supplies directly.
+% Each block is article's own definition with the marked jpt change applied.
+%
+% TO OVERRIDE SOMETHING ELSE FROM article.cls, add it in this block:
+%   1. find the definition in article.cls   (kpsewhich article.cls)
+%   2. paste it here, below \LoadClass
+%   3. \newcommand -> \renewcommand, \newenvironment -> \renewenvironment;
+%      keep any star (\newcommand* -> \renewcommand*); \def stays \def
+%   4. make the edit and annotate it the usual way: % jpt was <old value>
+% Counters and lengths cannot be re-declared -- use \setcounter / \setlength
+% instead of \newcounter / \newlength. If the definition sits inside
+% \if@titlepage or \if@twocolumn in article.cls, reproduce that conditional too
+% (see \maketitle and abstract below). Forgetting step 3 is safe: LaTeX stops
+% with "Command ... already defined" rather than silently doing the wrong thing.
+% No \makeatletter needed in here -- @ is already a letter inside a class file.
+
 \if@titlepage               % jpt titlepage settings                          
-  \newcommand\maketitle{\begin{titlepage}%
+  \renewcommand\maketitle{\begin{titlepage}%
   \let\footnotesize\small
   \let\footnoterule\relax
   \let \footnote \thanks
@@ -228,7 +136,7 @@
   \global\let\and\relax
   }
 \else
-  \newcommand\maketitle{\par
+  \renewcommand\maketitle{\par
     \begingroup
       \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
       \def\@makefnmark{\rlap{\@textsuperscript{\normalfont\@thefnmark}}}%
@@ -281,119 +189,20 @@
   \vskip 1.5em}
 \fi
 \setcounter{secnumdepth}{4} % jpt 3 is default
-\newcounter {part}
-\newcounter {section}
-\newcounter {subsection}[section]
-\newcounter {subsubsection}[subsection]
-\newcounter {paragraph}[subsubsection]
-\newcounter {subparagraph}[paragraph]
-\renewcommand \thepart {\@Roman\c@part}
-\renewcommand \thesection {\@arabic\c@section}
-\renewcommand\thesubsection   {\thesection.\@arabic\c@subsection}
-\renewcommand\thesubsubsection{\thesubsection.\@arabic\c@subsubsection}
-\renewcommand\theparagraph    {\thesubsubsection.\@arabic\c@paragraph}
-\renewcommand\thesubparagraph {\theparagraph.\@arabic\c@subparagraph}
-\newcommand\part{%
-   \if@noskipsec \leavevmode \fi
-   \par
-   \addvspace{4ex}%
-   \@afterindentfalse
-   \secdef\@part\@spart}
 
-\def\@part[#1]#2{%
-    \ifnum \c@secnumdepth >\m@ne
-      \refstepcounter{part}%
-      \addcontentsline{toc}{part}{\thepart\hspace{1em}#1}%
-    \else
-      \addcontentsline{toc}{part}{#1}%
-    \fi
-    {\parindent \z@ \raggedright
-     \interlinepenalty \@M
-     \normalfont
-     \ifnum \c@secnumdepth >\m@ne
-       \Large\bfseries \partname\nobreakspace\thepart
-       \par\nobreak
-     \fi
-     \huge \bfseries #2%
-     \markboth{}{}\par}%
-    \nobreak
-    \vskip 3ex
-    \@afterheading}
-\def\@spart#1{%
-    {\parindent \z@ \raggedright
-     \interlinepenalty \@M
-     \normalfont
-     \huge \bfseries #1\par}%
-     \nobreak
-     \vskip 3ex
-     \@afterheading}
-% jpt section edited to match others; all set to \normalsize
-\newcommand\section{\@startsection {section}{1}{\z@}%
+\renewcommand\section{\@startsection {section}{1}{\z@}%
                                    {-3.25ex \@plus -1ex \@minus -.2ex}% % jpt was -3.5
                                    {1.5ex \@plus.2ex}%                  % jpt was 2.3
                                    {\normalfont\normalsize\bfseries}}   % jpt was \Large
-\newcommand\subsection{\@startsection{subsection}{2}{\z@}%
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
                                      {-3.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.5ex \@plus .2ex}%
                                      {\normalfont\normalsize\bfseries}}  % jpt was \large
-\newcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\normalfont\normalsize\bfseries}}
-\newcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-                                    {3.25ex \@plus1ex \@minus.2ex}%
-                                    {-1em}%
-                                    {\normalfont\normalsize\bfseries}}
-\newcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
-                                       {3.25ex \@plus1ex \@minus .2ex}%
-                                       {-1em}%
-                                      {\normalfont\normalsize\bfseries}}
-\if@twocolumn
-  \setlength\leftmargini  {2em}
-\else
-  \setlength\leftmargini  {2.5em}
-\fi
-\leftmargin  \leftmargini
-\setlength\leftmarginii  {2.2em}
-\setlength\leftmarginiii {1.87em}
-\setlength\leftmarginiv  {1.7em}
-\if@twocolumn
-  \setlength\leftmarginv  {.5em}
-  \setlength\leftmarginvi {.5em}
-\else
-  \setlength\leftmarginv  {1em}
-  \setlength\leftmarginvi {1em}
-\fi
-\setlength  \labelsep  {.5em}
-\setlength  \labelwidth{\leftmargini}
-\addtolength\labelwidth{-\labelsep}
-\@beginparpenalty -\@lowpenalty
-\@endparpenalty   -\@lowpenalty
-\@itempenalty     -\@lowpenalty
-\renewcommand\theenumi{\@arabic\c@enumi}
-\renewcommand\theenumii{\@alph\c@enumii}
-\renewcommand\theenumiii{\@roman\c@enumiii}
-\renewcommand\theenumiv{\@Alph\c@enumiv}
-\newcommand\labelenumi{\theenumi.}
-\newcommand\labelenumii{(\theenumii)}
-\newcommand\labelenumiii{\theenumiii.}
-\newcommand\labelenumiv{\theenumiv.}
-\renewcommand\p@enumii{\theenumi}
-\renewcommand\p@enumiii{\theenumi(\theenumii)}
-\renewcommand\p@enumiv{\p@enumiii\theenumiii}
-\newcommand\labelitemi  {\labelitemfont \textbullet}
-\newcommand\labelitemii {\labelitemfont \bfseries $\circ$}
-\newcommand\labelitemiii{\labelitemfont \textasteriskcentered}
-\newcommand\labelitemiv {\labelitemfont \textperiodcentered}
-\newcommand\labelitemfont{\normalfont}
-\newenvironment{description}
-               {\list{}{\labelwidth\z@ \itemindent-\leftmargin
-                        \let\makelabel\descriptionlabel}}
-               {\endlist}
-\newcommand*\descriptionlabel[1]{\hspace\labelsep
-                                \normalfont\bfseries #1}
+
+\renewcommand\labelitemii {\labelitemfont \bfseries $\circ$}
+
 \if@titlepage
-  \newenvironment{abstract}{%
+  \renewenvironment{abstract}{%
       \titlepage
       \null\vfil
       \@beginparpenalty\@lowpenalty
@@ -403,7 +212,7 @@
       \end{center}}%
      {\par\vfil\null\endtitlepage}
 \else
-  \newenvironment{abstract}{%
+  \renewenvironment{abstract}{%
       \if@twocolumn
         \section*{\abstractname}%
       \else
@@ -415,259 +224,9 @@
       \fi}
       {\if@twocolumn\else\endquote\fi}
 \fi
-\newenvironment{verse}
-               {\let\\\@centercr
-                \list{}{\itemsep      \z@
-                        \itemindent   -1.5em%
-                        \listparindent\itemindent
-                        \rightmargin  \leftmargin
-                        \advance\leftmargin 1.5em}%
-                \item\relax}
-               {\endlist}
-\newenvironment{quotation}
-               {\list{}{\listparindent 1.5em%
-                        \itemindent    \listparindent
-                        \rightmargin   \leftmargin
-                        \parsep        \z@ \@plus\p@}%
-                \item\relax}
-               {\endlist}
-\newenvironment{quote}
-               {\list{}{\rightmargin\leftmargin}%
-                \item\relax}
-               {\endlist}
-\if@compatibility
-  \newenvironment{titlepage}
-    {%
-      \if@twocolumn
-        \@restonecoltrue\onecolumn
-      \else
-        \@restonecolfalse\newpage
-      \fi
-      \thispagestyle{empty}%
-      \setcounter{page}\z@
-    }%
-    {\if@restonecol\twocolumn \else \newpage \fi
-    }
-\else
-  \newenvironment{titlepage}
-    {%
-      \if@twocolumn
-        \@restonecoltrue\onecolumn
-      \else
-        \@restonecolfalse\newpage
-      \fi
-      \thispagestyle{empty}%
-      \setcounter{page}\@ne
-    }%
-    {\if@restonecol\twocolumn \else \newpage \fi
-     \if@twoside\else
-        \setcounter{page}\@ne
-     \fi
-    }
-\fi
-\newcommand\appendix{\par
-  \setcounter{section}{0}%
-  \setcounter{subsection}{0}%
-  \gdef\thesection{\@Alph\c@section}}
-\setlength\arraycolsep{5\p@}
-\setlength\tabcolsep{6\p@}
-\setlength\arrayrulewidth{.4\p@}
-\setlength\doublerulesep{2\p@}
-\setlength\tabbingsep{\labelsep}
-\skip\@mpfootins = \skip\footins
-\setlength\fboxsep{3\p@}
-\setlength\fboxrule{.4\p@}
-\renewcommand \theequation {\@arabic\c@equation}
-\newcounter{figure}
-\renewcommand \thefigure {\@arabic\c@figure}
-\def\fps@figure{tbp}
-\def\ftype@figure{1}
-\def\ext@figure{lof}
-\def\fnum@figure{\figurename\nobreakspace\thefigure}
-\newenvironment{figure}
-               {\@float{figure}}
-               {\end@float}
-\newenvironment{figure*}
-               {\@dblfloat{figure}}
-               {\end@dblfloat}
-\newcounter{table}
-\renewcommand\thetable{\@arabic\c@table}
-\def\fps@table{tbp}
-\def\ftype@table{2}
-\def\ext@table{lot}
-\def\fnum@table{\tablename\nobreakspace\thetable}
-\newenvironment{table}
-               {\@float{table}}
-               {\end@float}
-\newenvironment{table*}
-               {\@dblfloat{table}}
-               {\end@dblfloat}
-\newlength\abovecaptionskip
-\newlength\belowcaptionskip
-\setlength\abovecaptionskip{10\p@}
-\setlength\belowcaptionskip{0\p@}
-\long\def\@makecaption#1#2{%
-  \vskip\abovecaptionskip
-  \sbox\@tempboxa{#1: #2}%
-  \ifdim \wd\@tempboxa >\hsize
-    #1: #2\par
-  \else
-    \global \@minipagefalse
-    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
-  \fi
-  \vskip\belowcaptionskip}
-\DeclareOldFontCommand{\rm}{\normalfont\rmfamily}{\mathrm}
-\DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
-\DeclareOldFontCommand{\tt}{\normalfont\ttfamily}{\mathtt}
-\DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
-\DeclareOldFontCommand{\it}{\normalfont\itshape}{\mathit}
-\DeclareOldFontCommand{\sl}{\normalfont\slshape}{\@nomath\sl}
-\DeclareOldFontCommand{\sc}{\normalfont\scshape}{\@nomath\sc}
-\DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
-\DeclareRobustCommand*\mit{\@fontswitch\relax\mathnormal}
-\newcommand\@pnumwidth{1.55em}
-\newcommand\@tocrmarg{2.55em}
-\newcommand\@dotsep{4.5}
+
 \setcounter{tocdepth}{4} % jpt 3 is default
-\newcommand\tableofcontents{%
-    \section*{\contentsname
-        \@mkboth{%
-           \MakeUppercase\contentsname}{\MakeUppercase\contentsname}}%
-    \@starttoc{toc}%
-    }
-\newcommand*\l@part[2]{%
-  \ifnum \c@tocdepth >-2\relax
-    \addpenalty\@secpenalty
-    \addvspace{2.25em \@plus\p@}%
-    \setlength\@tempdima{3em}%
-    \begingroup
-      \parindent \z@ \rightskip \@pnumwidth
-      \parfillskip -\@pnumwidth
-      {\leavevmode
-       \large \bfseries #1\hfil
-       \hb@xt@\@pnumwidth{\hss #2%
-                          \kern-\p@\kern\p@}}\par
-       \nobreak
-       \if@compatibility
-         \global\@nobreaktrue
-         \everypar{\global\@nobreakfalse\everypar{}}%
-      \fi
-    \endgroup
-  \fi}
-\newcommand*\l@section[2]{%
-  \ifnum \c@tocdepth >\z@
-    \addpenalty\@secpenalty
-    \addvspace{1.0em \@plus\p@}%
-    \setlength\@tempdima{1.5em}%
-    \begingroup
-      \parindent \z@ \rightskip \@pnumwidth
-      \parfillskip -\@pnumwidth
-      \leavevmode \bfseries
-      \advance\leftskip\@tempdima
-      \hskip -\leftskip
-      #1\nobreak\hfil
-      \nobreak\hb@xt@\@pnumwidth{\hss #2%
-                                 \kern-\p@\kern\p@}\par
-    \endgroup
-  \fi}
-\newcommand*\l@subsection{\@dottedtocline{2}{1.5em}{2.3em}}
-\newcommand*\l@subsubsection{\@dottedtocline{3}{3.8em}{3.2em}}
-\newcommand*\l@paragraph{\@dottedtocline{4}{7.0em}{4.1em}}
-\newcommand*\l@subparagraph{\@dottedtocline{5}{10em}{5em}}
-\newcommand\listoffigures{%
-    \section*{\listfigurename}%
-      \@mkboth{\MakeUppercase\listfigurename}%
-              {\MakeUppercase\listfigurename}%
-    \@starttoc{lof}%
-    }
-\newcommand*\l@figure{\@dottedtocline{1}{1.5em}{2.3em}}
-\newcommand\listoftables{%
-    \section*{\listtablename}%
-      \@mkboth{%
-          \MakeUppercase\listtablename}%
-         {\MakeUppercase\listtablename}%
-    \@starttoc{lot}%
-    }
-\let\l@table\l@figure
-\newdimen\bibindent
-\setlength\bibindent{1.5em}
-\newenvironment{thebibliography}[1]
-     {\section*{\refname}%
-      \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}%
-      \list{\@biblabel{\@arabic\c@enumiv}}%
-           {\settowidth\labelwidth{\@biblabel{#1}}%
-            \leftmargin\labelwidth
-            \advance\leftmargin\labelsep
-            \@openbib@code
-            \usecounter{enumiv}%
-            \let\p@enumiv\@empty
-            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
-      \sloppy
-      \clubpenalty4000
-      \@clubpenalty \clubpenalty
-      \widowpenalty4000%
-      \sfcode`\.\@m}
-     {\def\@noitemerr
-       {\@latex@warning{Empty `thebibliography' environment}}%
-      \endlist}
-\newcommand\newblock{\hskip .11em\@plus.33em\@minus.07em}
-\let\@openbib@code\@empty
-\newenvironment{theindex}
-               {\if@twocolumn
-                  \@restonecolfalse
-                \else
-                  \@restonecoltrue
-                \fi
-                \twocolumn[\section*{\indexname}]%
-                \@mkboth{\MakeUppercase\indexname}%
-                        {\MakeUppercase\indexname}%
-                \thispagestyle{plain}\parindent\z@
-                \parskip\z@ \@plus .3\p@\relax
-                \columnseprule \z@
-                \columnsep 35\p@
-                \let\item\@idxitem}
-               {\if@restonecol\onecolumn\else\clearpage\fi}
-\newcommand\@idxitem{\par\hangindent 40\p@}
-\newcommand\subitem{\@idxitem \hspace*{20\p@}}
-\newcommand\subsubitem{\@idxitem \hspace*{30\p@}}
-\newcommand\indexspace{\par \vskip 10\p@ \@plus5\p@ \@minus3\p@\relax}
-\renewcommand\footnoterule{%
-  \kern-3\p@
-  \hrule\@width.4\columnwidth
-  \kern2.6\p@}
-\newcommand\@makefntext[1]{%
-    \parindent 1em%
-    \noindent
-    \hb@xt@1.8em{\hss\@makefnmark}#1}
-\newcommand\contentsname{Contents}
-\newcommand\listfigurename{List of Figures}
-\newcommand\listtablename{List of Tables}
-\newcommand\refname{References}
-\newcommand\indexname{Index}
-\newcommand\figurename{Figure}
-\newcommand\tablename{Table}
-\newcommand\partname{Part}
-\newcommand\appendixname{Appendix}
-\newcommand\abstractname{Abstract}
-\def\today{\ifcase\month\or
-  January\or February\or March\or April\or May\or June\or
-  July\or August\or September\or October\or November\or December\fi
-  \space\number\day, \number\year}
-\setlength\columnsep{10\p@}
-\setlength\columnseprule{0\p@}
-\pagestyle{plain}
-\pagenumbering{arabic}
-\if@twoside
-\else
-  \raggedbottom
-\fi
-\if@twocolumn
-  \twocolumn
-  \sloppy
-  \flushbottom
-\else
-  \onecolumn
-\fi
+
 
 % ==========================================================================================
 % ==========================================================================================
@@ -741,6 +300,73 @@
   \fi
   \RequirePackage{textgreek}
   \RequirePackage{mathrsfs}
+\else
+\fi
+
+\if@cmgr
+  \RequirePackage[grade=D]{cmgraded}
+  \RequirePackage{microtype}
+  %% The Computer Modern Graded fonts carry no ogonek glyphs (U+0104/0105/0118/
+  %% 0119), so microtype cannot resolve a slot for \k A, \k a, \k E, \k e in the
+  %% TU character-inheritance list of microtype.cfg and warns about each one.
+  %% Re-declare that list for the cmgraded families alone, minus the ogoneks: a
+  %% family-specific list takes precedence over the encoding-wide one, and the
+  %% rest is verbatim from microtype.cfg, so protrusion is otherwise unchanged.
+  %% Family names follow the grade: a/b/c/d/e/f/g = G0/G10/G19/G32/G44/G57/G72,
+  %% so grade=D above means G32 here -- keep the two in step.
+  \DeclareCharacterInheritance
+     { encoding = TU,
+       family   = {ComputerModernGradedG32Serif,
+                   ComputerModernGradedG32Sans,
+                   ComputerModernGradedG32Typewriter} }
+     { A = {\`A,\'A,\^A,\~A,\"A,\r A,\u A},
+       a = {\`a,\'a,\^a,\~a,\"a,\r a,\u a},
+       C = {\'C,\c C,\v C},
+       c = {\'c,\c c,\v c},
+       D = {\v D,\DH},
+       d = {\v d,\dj},
+       E = {\`E,\'E,\^E,\"E,\v E},
+       e = {\`e,\'e,\^e,\"e,\v e},
+       G = {\u G},
+       g = {\u g},
+       I = {\`I,\'I,\^I,\"I,\.I},
+       i = {\`i,\'i,\^i,\"i,\i},
+       L = {\L,\'L,\v L},
+       l = {\l,\'l,\v l},
+       N = {\'N,\~N,\v N},
+       n = {\'n,\~n,\v n},
+       O = {\O,\`O,\'O,\^O,\~O,\"O,\H O},
+       o = {\o,\`o,\'o,\^o,\~o,\"o,\H o},
+       R = {\'R,\v R},
+       r = {\'r,\v r},
+       S = {\'S,\c S,\v S},
+       s = {\'s,\c s,\v s},
+       T = {\c T,\v T},
+       t = {\c t,\v t},
+       U = {\`U,\'U,\^U,\"U,\H U,\r U},
+       u = {\`u,\'u,\^u,\"u,\H u,\r u},
+       Y = {\'Y,\"Y},
+       y = {\'y,\"y},
+       Z = {\'Z,\.Z,\v Z},
+       z = {\'z,\.z,\v z},
+       - = "AD
+     }
+  \RequirePackage{setspace}
+  \RequirePackage{biolinum}
+  \setstretch{1.1}
+  \if@onehalf
+    \onehalfspacing
+  \else
+  \fi
+  \if@double
+    \doublespacing
+  \else
+  \fi
+  \if@nolinespacing
+    \setstretch{1.0}
+  \else
+  \fi
+  \RequirePackage{upgreek}
 \else
 \fi
 
@@ -1216,8 +842,38 @@
   \newcommand{\cmi}{cm$^{-1}$}
   \newcommand{\cmc}{cm$^{3}$}
   \newcommand{\MM}{\mathcal{M}}
-  \newcommand{\emf}{\mathscr{E}} 
-  \newcommand{\Faraday}{\mathscr{F}}  
+  %% emf and Faraday's constant. Every font module loads mathalpha (or mathrsfs)
+  %% to give \mathscr a script face matching its text font, so the default here
+  %% stays \mathscr and follows the module. cmgr is the exception: it loads
+  %% neither, and wants the STIX calligraphic capitals specifically, so declare
+  %% them outright. BOONDOX-calo is the Type 1 STIX oblique calligraphic --
+  %% note that mathalpha's scr=boondox is BOONDOX-scr, a different face.
+  \if@cmgr
+    %% Declared as math symbols rather than an alphabet: \emf and \Faraday take
+    %% no argument, and the two of them share a single math family.
+    \DeclareSymbolFont{stixcal}{U}{BOONDOX-calo}{m}{n}
+    \SetSymbolFont{stixcal}{bold}{U}{BOONDOX-calo}{b}{n}
+    \DeclareMathSymbol{\emf}{\mathalpha}{stixcal}{`E}
+    \DeclareMathSymbol{\Faraday}{\mathalpha}{stixcal}{`F}
+    %% BOONDOX-calo is a U-encoded font, so its E/F would reach the tagged PDF
+    %% and the MathML as plain Latin E/F. Tell luamml the real Unicode --
+    %% U+2130 SCRIPT CAPITAL E and U+2131 SCRIPT CAPITAL F -- so text extraction
+    %% and MathML both come out right under pdfstandard=ua-2. Inert when luamml
+    %% is not loaded; the family number is only fixed once the preamble ends.
+    \AddToHook{begindocument}{%
+      \ifdefined\directlua
+        \directlua{%
+          local ok, conv = pcall(require, 'luamml-convert')
+          if ok then
+            conv.register_family(\number\symstixcal, {[0x45] = 0x2130, [0x46] = 0x2131})
+          end
+        }%
+      \fi
+    }
+  \else
+    \newcommand{\emf}{\mathscr{E}}
+    \newcommand{\Faraday}{\mathscr{F}}
+  \fi
   \newcommand{\delg}{\Delta G}
   \newcommand{\dgnot}{\Delta G^{\circ}}
   \newcommand{\dgfnot}{\Delta G_{\text{f}}^{\circ}}

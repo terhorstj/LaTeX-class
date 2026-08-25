@@ -1,4 +1,4 @@
-#  Custom JPT Article Class - documentation updated for v1.5 20251216
+#  Custom JPT Article Class - documentation updated for v1.6 20260824
 
 Put these files in ```/usr/local/texlive/texmf-local/tex/latex/jpt``` and run ```mktexlsr```.
 
@@ -22,7 +22,7 @@ My motivation for making this class file was to simplify setup of a document by 
 
 To invoke the class, use: ```\documentclass{jpt}```
 
-* The class is based on ```article.cls``` and so the typical global options (e.g., ```10pt```, ```titlepage```, etc.) will still work as expected. Some font sizes and spacing have been tweaked, however. (These changes are noted in the class file, which can also be compared to the original ```article.cls```.)
+* As of v1.6 the class is a true subclass -- it calls ```\LoadClass{article}``` rather than carrying its own copy of ```article.cls```. Any option the class does not claim for itself (```10pt```, ```11pt```, ```12pt```, ```twoside```, ```titlepage```, ```twocolumn```, ```leqno```, ```fleqn```, ```openbib```, paper sizes) is forwarded straight to ```article``` and works exactly as it does there. Document preambles are unaffected: ```\documentclass[10pt,mlm,chem,misc,blockpar]{jpt}``` is unchanged. Some font sizes and spacing have been tweaked, however. (These changes are noted in the class file, which can also be compared to the original ```article.cls```.)
 
 By invoking the class file, you will automatically load the following packages and settings.
 
@@ -37,6 +37,7 @@ By invoking the class file, you will automatically load the following packages a
 Other global options that I have added are as follow, with a brief description for each. Font packages all load ```microtype``` and ```fontenc```. More details are found in the next section. Package ```mathalpha``` is used to define calligraphic and math script styles to match math font.
 
 * ```cm``` - use CM fonts from AMS, Blue Sky, and Y&Y
+* ```cmgr``` - blacker version of the original Knuth CM, compatible with LuaLaTeX, tagging, and patched for compatibility with microtype
 * ```lm```  - use Latin Modern font
 * ```mlm``` - use ```mlmodern``` font
 * ```tmx``` - use ```newtxtext``` and ```newtxmath``` fonts
@@ -88,6 +89,30 @@ This option uses the classic Computer Modern fonts, developed by Blue Sky / Y&Y 
 * ```\RequirePackage{textgreek}``` - load matching upright Greek in text mode
 * ```\RequirePackage{mathrsfs}``` - load RSFS math script font
 * ```\RequirePackage{biolinum}``` - Biolinum sans serif font
+
+### CMGR
+
+Example: ```\documentclass[10pt,cmgr,tagging]{jpt}```
+
+**This option requires LuaLaTeX.** The ```cmgraded``` package regenerates Knuth's original Computer Modern from METAFONT with a "grade" of blackness applied, darkening the fonts progressively without turning a regular weight into a bold one. The metrics are untouched, so line and page breaks are identical to ```cm```. The package ships seven grade presets, a--g (grades 0, 10, 19, 32, 44, 57, 72); the class asks for D, which is grade 32.
+
+Grade D is not an arbitrary pick. Measured as ink coverage over an identical page of 10pt text, CM and LM are both 100%, grade D is 136%, and ```mlmodern``` is 138% -- so ```cmgr``` reproduces the MLM blackness I prefer to within a couple of percent. (Grade e/G44 is 148%, which overshoots.) The point of the option is that ```cmgraded``` ships OpenType faces and works under LuaLaTeX, which ```mlmodern``` does not: **when a document needs ```tagging```, this is the way to get the MLM look**, since accessible/tagged PDF has to be compiled with LuaLaTeX. Note the two get there by different routes -- ```mlmodern``` thickens the hairlines specifically and so flattens CM's stroke contrast, while grading darkens more evenly -- so the texture is close but not identical.
+
+This option loads the following:
+
+* ```\RequirePackage[grade=D]{cmgraded}``` - Computer Modern Graded at grade D (loads ```fontspec```, so text is TU-encoded; no ```fontenc``` needed)
+* ```\RequirePackage{microtype}``` - improved typography
+* ```\DeclareCharacterInheritance{...}``` - patch, see below
+* ```\RequirePackage{setspace}\setstretch{1.1}``` - give linespacing a little extra breathing room. Stretch can be readjusted in the preamble.
+* ```\RequirePackage{biolinum}``` - Biolinum sans serif font
+* ```\RequirePackage{upgreek}``` - as with MLM, the heavier upright Greek matches better than ```textgreek```
+
+A few things to remember about this module, since it does not simply mirror ```cm```:
+
+* **The microtype patch is required, not optional.** CM has no ogonek, so the graded fonts have no U+0104/0105/0118/0119 either, and ```microtype``` cannot resolve a slot for ```\k A```, ```\k a```, ```\k E```, ```\k e``` in the TU character-inheritance list it ships in ```microtype.cfg``` -- which produces four warnings on every compile. The class re-declares that list for the cmgraded font families alone, with the four ogonek entries removed; a family-specific list takes precedence over the encoding-wide one, and everything else is copied verbatim, so protrusion is otherwise unchanged. **The family names in that patch encode the grade** (a--g = G0/G10/G19/G32/G44/G57/G72), so changing ```grade=D``` above means changing ```ComputerModernGradedG32*``` to match.
+* **```textgreek``` is not loaded, and neither are the ```\text``` aliases.** Unlike MLM, this module does not define ```\textalpha```, ```\textbeta```, etc. Greek is available in math mode via ```upgreek``` (```$\upalpha$```). Copy the alias block out of the MLM module if text-mode Greek is needed.
+* **Neither ```mathrsfs``` nor ```mathalpha``` is loaded**, so ```\mathscr``` is unavailable here -- unlike every other font module. Instead the ```chem``` module special-cases ```cmgr```: ```\emf``` and ```\Faraday``` are declared as math symbols directly from ```BOONDOX-calo```, the Type 1 STIX oblique calligraphic. (Note this is *not* mathalpha's ```scr=boondox```, which selects the different ```BOONDOX-scr``` script face.) In every other module ```\emf``` stays ```\mathscr{E}``` and follows whatever that module's ```mathalpha``` setup provides. A document under ```cmgr``` that calls ```\mathscr``` itself must load ```mathrsfs``` or ```mathalpha``` in its own preamble.
+* **Tagging note.** ```BOONDOX-calo``` is U-encoded, so its E and F would otherwise reach the tagged PDF and the MathML as plain Latin E and F. The ```chem``` module registers U+2130 (script capital E) and U+2131 (script capital F) with ```luamml```, so text extraction and MathML both come out correct under ```pdfstandard=ua-2```. This mapping is specific to ```cmgr```; the script faces the other modules load through ```mathalpha``` have the same U-encoding issue and no equivalent mapping.
 
 ### LM
 
